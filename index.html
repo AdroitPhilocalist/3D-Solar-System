@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Solar System Simulation</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls for camera movement -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            transition: background-color 0.5s ease;
+        }
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .dark-theme {
+            background-color: #111827;
+            color: #f3f4f6;
+        }
+        .light-theme {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        /* Custom slider styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #4b5563;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <div id="canvas-container"></div>
+    
+    <!-- Tooltip for planet names -->
+    <div id="tooltip" class="tooltip"></div>
+    
+    <!-- Control Panel -->
+    <div id="control-panel" class="fixed bottom-0 left-0 right-0 bg-gray-800 bg-opacity-80 p-4 text-white transition-all duration-300 transform translate-y-0 md:w-80 md:right-auto md:h-full md:translate-y-0 md:translate-x-0 z-10">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">Solar System Controls</h2>
+            <div class="flex space-x-2">
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-3 rounded-md transition">
+                    <span id="theme-icon">☀️</span>
+                </button>
+                <!-- Pause/Resume Button -->
+                <button id="pause-button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-3 rounded-md transition">Pause</button>
+                <!-- Mobile Toggle Button -->
+                <button id="toggle-panel" class="md:hidden bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-3 rounded-md transition">Hide</button>
+            </div>
+        </div>
+        
+        <!-- Planet Speed Controls -->
+        <div class="space-y-4 overflow-y-auto max-h-[calc(100vh-120px)] pr-2">
+            <!-- Mercury -->
+            <div class="planet-control">
+                <div class="flex justify-between items-center mb-1">
+                    <label for="mercury-speed" class="font-medium">Mercury</label>
+                    <span class="text-sm speed-value" id="mercury-speed-value">1.0x</span>
+                </div>
+                <input type="range" id="mercury-speed" min="0" max="2" step="0.1" value="1" class="w-full">
+            </div>
+            
+            <!-- Venus -->
+            <div class="planet-control">
+                <div class="flex justify-between items-center mb-1">
+                    <label for="venus-speed" class="font-medium">Venus</label>
+                    <span class="text-sm speed-value" id="venus-speed-value">1.0x</span>
+                </div>
+                <input type="range" id="venus-speed" min="0" max="2" step="0.1" value="1" class="w-full">
+            </div>
+            
+            <!-- Earth -->
+            <div class="planet-control">
+                <div class="flex justify-between items-center mb-1">
+                    <label for="earth-speed" class="font-medium">Earth</label>
+                    <span class="text-sm speed-value" id="earth-speed-value">1.0x</span>
+                </div>
+                <input type="range" id="earth-speed" min="0" max="2" step="0.1" value="1" class="w-full">
+            </div>
+            
+            <!-- Mars -->
+            <div class="planet-control">
+                <div class="flex justify-between items-center mb-1">
+                    <label for="mars-speed" class="font-medium">Mars</label>
+                    <span class="text-sm speed-value" id="mars-speed-value">1.0x</span>
+                </div>
+                <input type="range" id="mars-speed" min="0" max="2" step="0.1" value="1" class="w-full">
+            </div>
+            
+            <!-- Jupiter -->
+            <div class="planet-control">
+                <div class="flex justify-between items-center mb-1">
+                    <label for="jupiter-speed" class="font-medium">Jupiter</label>
+                    <span class="text-sm speed-value" id="jupiter-speed-value">1.0x</span>
+                </div>
+                <input type="range" id="jupiter-speed" min="0" max="2" step="0.1" value="1" class="w-full">
+            </div>
+            
+            <!-- Saturn -->
+            <div class="planet-control">
+                <div class="flex justify-between items-center mb-1">
+                    <label for="saturn-speed" class="font-medium">Saturn</label>
+                    <span class="text-sm speed-value" id="saturn-speed-value">1.0x</span>
+                </div>
+                <input type="range" id="saturn-speed" min="0" max="2" step="0.1" value="1" class="w-full">
+            </div>
+            
+            <!-- Uranus -->
+            <div class="planet-control">
+                <div class="flex justify-between items-center mb-1">
+                    <label for="uranus-speed" class="font-medium">Uranus</label>
+                    <span class="text-sm speed-value" id="uranus-speed-value">1.0x</span>
+                </div>
+                <input type="range" id="uranus-speed" min="0" max="2" step="0.1" value="1" class="w-full">
+            </div>
+            
+            <!-- Neptune -->
+            <div class="planet-control">
+                <div class="flex justify-between items-center mb-1">
+                    <label for="neptune-speed" class="font-medium">Neptune</label>
+                    <span class="text-sm speed-value" id="neptune-speed-value">1.0x</span>
+                </div>
+                <input type="range" id="neptune-speed" min="0" max="2" step="0.1" value="1" class="w-full">
+            </div>
+        </div>
+        
+        <!-- Reset Button -->
+        <div class="mt-4">
+            <button id="reset-button" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition">Reset Speeds</button>
+        </div>
+    </div>
+    
+    <!-- Mobile Panel Toggle Button (when panel is hidden) -->
+    <button id="show-panel" class="fixed bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-full shadow-lg transition hidden md:hidden z-20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+    </button>
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-black flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+            <p class="text-xl text-white">Loading Solar System...</p>
+        </div>
+    </div>
+    
+    <!-- Main JavaScript -->
+    <script src="js/main.js"></script>
+</body>
+</html>
