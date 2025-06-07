@@ -713,6 +713,20 @@ function setupControls() {
     // Hide the toggle button
     this.classList.add('hidden');
     });
+    
+    // Settings button functionality
+    const settingsBtn = document.getElementById('settings-btn');
+    
+    settingsBtn.addEventListener('click', function() {
+        // For mobile (bottom panel)
+        controlPanel.classList.remove('translate-y-full');
+        // For desktop (side panel)
+        controlPanel.classList.remove('md:translate-x-full');
+        controlPanel.classList.add('md:translate-x-0');
+        
+        // Hide the show panel button if it's visible
+        showPanel.classList.add('hidden');
+    });
 }
 
 // Animation loop
