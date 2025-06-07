@@ -683,22 +683,35 @@ function setupControls() {
     });
     
     // Mobile panel toggle
+    // Panel toggle functionality
     const togglePanel = document.getElementById('toggle-panel');
     const showPanel = document.getElementById('show-panel');
     const controlPanel = document.getElementById('control-panel');
     
+    // Hide panel when close button is clicked
     togglePanel.addEventListener('click', function() {
-        controlPanel.classList.add('translate-y-full');
-        controlPanel.classList.remove('md:translate-y-0');
-        setTimeout(() => {
-            showPanel.classList.remove('hidden');
-        }, 300);
+    // For mobile (bottom panel)
+    controlPanel.classList.add('translate-y-full');
+    // For desktop (side panel)
+    controlPanel.classList.add('md:translate-x-full');
+    controlPanel.classList.remove('md:translate-x-0');
+    
+    // Show the toggle button
+    setTimeout(() => {
+    showPanel.classList.remove('hidden');
+    }, 300);
     });
     
+    // Show panel when toggle button is clicked
     showPanel.addEventListener('click', function() {
-        controlPanel.classList.remove('translate-y-full');
-        controlPanel.classList.add('md:translate-y-0');
-        this.classList.add('hidden');
+    // For mobile (bottom panel)
+    controlPanel.classList.remove('translate-y-full');
+    // For desktop (side panel)
+    controlPanel.classList.remove('md:translate-x-full');
+    controlPanel.classList.add('md:translate-x-0');
+    
+    // Hide the toggle button
+    this.classList.add('hidden');
     });
 }
 
